@@ -21,23 +21,34 @@ function showPanel(id) {
 function extractDesign(tabId) {
   showPanel('sc-loading');
   chrome.runtime.sendMessage({ type: 'scrollCaptureExtractDesign', tabId: tabId }, function (response) {
-    if (chrome.runtime.lastError) {
-      showError(chrome.runtime.lastError.message);
-      return;
-    }
-    if (!response) {
-      showError('No response from background script.');
-      return;
-    }
-    if (response.error) {
-      showError(response.error);
-      return;
-    }
-    showDesignResult(response, tabId);
+    handleExtractResponse(response, tabId, 'DESIGN.md', 'scrollCaptureDownloadDesign');
   });
 }
 
-function showDesignResult(response, tabId) {
+function extractSkill(tabId) {
+  showPanel('sc-loading');
+  chrome.runtime.sendMessage({ type: 'scrollCaptureExtractSkill', tabId: tabId }, function (response) {
+    handleExtractResponse(response, tabId, 'SKILL.md', 'scrollCaptureDownloadSkill');
+  });
+}
+
+function handleExtractResponse(response, tabId, filename, downloadType) {
+  if (chrome.runtime.lastError) {
+    showError(chrome.runtime.lastError.message);
+    return;
+  }
+  if (!response) {
+    showError('No response from background script.');
+    return;
+  }
+  if (response.error) {
+    showError(response.error);
+    return;
+  }
+  showDesignResult(response, tabId, filename, downloadType);
+}
+
+function showDesignResult(response, tabId, filename, downloadType) {
   showPanel('sc-design-result');
 
   var meta = document.getElementById('sc-design-meta');
@@ -61,11 +72,12 @@ function showDesignResult(response, tabId) {
   document.getElementById('sc-design-markdown').value = response.markdown || '';
 
   var downloadBtn = document.getElementById('sc-download-btn');
+  downloadBtn.innerHTML = '<span class="sc-icon fa-solid fa-download"></span> Download ' + filename;
   downloadBtn.onclick = function () {
     chrome.runtime.sendMessage({
-      type: 'scrollCaptureDownloadDesign',
+      type: downloadType,
       markdown: response.markdown,
-      filename: 'DESIGN.md'
+      filename: filename
     });
   };
 
@@ -104,11 +116,17 @@ function startPopup(tabId) {
     document.getElementById('sc-design-btn').onclick = function () {
       extractDesign(tabId);
     };
+    document.getElementById('sc-skill-btn').onclick = function () {
+      extractSkill(tabId);
+    };
   }).catch(function () {
     /* Page cannot be scripted — show fallback */
     showPanel('sc-fallback');
     document.getElementById('sc-design-btn-fallback').onclick = function () {
       extractDesign(tabId);
+    };
+    document.getElementById('sc-skill-btn-fallback').onclick = function () {
+      extractSkill(tabId);
     };
   });
 }

@@ -29,6 +29,24 @@
     }
   };
 
+  window.__scrollCaptureExtractSkill = function () {
+    try {
+      var payload = extractPageStyles();
+      var normalized = window.__DS.normalize(payload);
+      var markdown = window.__DS.generateSkill({ normalized: normalized, metadata: {} });
+      var validation = window.__DS.validate("skill", markdown);
+      return {
+        markdown: markdown,
+        validation: validation,
+        sampledElements: payload.sampledElements,
+        totalElements: payload.totalElements,
+        source: payload.source
+      };
+    } catch (err) {
+      return { error: String(err && err.message ? err.message : err) };
+    }
+  };
+
   /* ── Extraction ─────────────────────────────────────────────── */
 
   function extractPageStyles() {

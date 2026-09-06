@@ -25,16 +25,19 @@ popup UI.
 Added to the extension alongside the existing video capture feature:
 - `design-scope-normalize.js` — Port of `generate-design-scope/normalize.mjs`; normalizes extracted CSS into design tokens
 - `design-scope-generate.js` — Port of `generate-design-scope/generate-design-md.mjs`; generates DESIGN.md markdown
-- `design-scope-validate.js` — Port of `generate-design-scope/validate.mjs`; validates the generated markdown
+- `design-scope-skill-generate.js` — Port of `generate-design-scope/generate-skill-md.mjs`; generates SKILL.md markdown
+- `design-scope-validate.js` — Port of `generate-design-scope/validate.mjs`; validates the generated markdown (includes numeric sanity checks)
 - `design-scope.js` — Page-level style extractor; samples visible elements, builds payload, calls normalize → generate → validate
 
 ### Flow
 1. User clicks extension icon → popup (`noscript.html`) shows options
 2. "Extract DESIGN.md" sends `scrollCaptureExtractDesign` message to background
-3. Background injects the 4 `design-scope-*.js` files into the active tab
-4. `design-scope.js` samples visible elements, extracts computed styles + site signals
-5. Normalize → Generate → Validate produces the DESIGN.md markdown
-6. Result returns to popup for preview and download
+3. "Extract SKILL.md" sends `scrollCaptureExtractSkill` message to background
+4. Background injects the `design-scope-*.js` files into the active tab
+5. `design-scope.js` samples visible elements, extracts computed styles + site signals
+6. Normalize → Generate → Validate produces the DESIGN.md or SKILL.md markdown
+7. Result returns to popup for preview and download
+8. DESIGN/SKILL extraction is also available as icon tabs in the in-page panel (content.js)
 
 ## Secrets
 None required. All logic runs locally in the browser.
