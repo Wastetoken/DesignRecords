@@ -125,6 +125,9 @@ function startPopup(tabId) {
     document.getElementById('sc-design-btn-fallback').onclick = function () {
       extractDesign(tabId);
     };
+    document.getElementById('sc-skill-btn-fallback').onclick = function () {
+      extractSkill(tabId);
+    };
   });
 }
 
