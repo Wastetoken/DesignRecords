@@ -129,8 +129,11 @@
       <h1>Scroll Capture</h1>
       <p>
         Record your websites and automate scrolling and mouse actions for your
-        portfolio screen captures. This is a Manifest V3 Chrome extension — it
-        runs inside the browser as an installed extension, not as a web app.
+        portfolio screen captures. Also extracts design tokens (colors,
+        typography, spacing, motion) from any page and generates a
+        implementation-ready <code>DESIGN.md</code>. This is a Manifest V3
+        Chrome extension — it runs inside the browser as an installed
+        extension, not as a web app.
       </p>
     </div>
 
@@ -141,7 +144,19 @@
         <li>Enable <strong>Developer mode</strong> (top-right toggle)</li>
         <li>Click <strong>Load unpacked</strong> and select this project folder</li>
         <li>Pin the Scroll Capture extension to your toolbar</li>
-        <li>Navigate to a website and click the extension icon to start recording</li>
+        <li>Navigate to a website and click the extension icon</li>
+        <li>Choose <strong>Record Video</strong> to capture, or <strong>Extract DESIGN.md</strong> to generate a design system document</li>
+      </ul>
+    </div>
+
+    <div class="info-card">
+      <h2>DESIGN.md Extractor</h2>
+      <ul>
+        <li>Samples visible elements and extracts computed styles (typography, colors, spacing, radius, shadows, motion)</li>
+        <li>Normalizes raw CSS values into semantic design tokens</li>
+        <li>Infers site profile (audience, product surface) from page signals</li>
+        <li>Generates a validated <code>DESIGN.md</code> with WCAG 2.2 AA accessibility rules</li>
+        <li>Logic ported from <code>generate-design-scope/</code> modules (normalize, generate, validate)</li>
       </ul>
     </div>
 

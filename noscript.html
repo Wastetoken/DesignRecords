@@ -12,6 +12,82 @@
       body[data-display='true'] {
         display: block;
       }
+      .sc-panel { display: none; }
+      .sc-design-btn {
+        display: block;
+        width: 100%;
+        padding: 8px 12px;
+        margin-top: 8px;
+        background: #2a6df0;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+        text-align: left;
+      }
+      .sc-design-btn:hover { background: #1a5de0; }
+      .sc-design-btn .sc-icon { margin-right: 6px; }
+      .sc-record-btn {
+        display: block;
+        width: 100%;
+        padding: 8px 12px;
+        background: #e94560;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+        text-align: left;
+      }
+      .sc-record-btn:hover { background: #d93550; }
+      .sc-record-btn .sc-icon { margin-right: 6px; }
+      .sc-design-textarea {
+        width: 100%;
+        min-height: 180px;
+        max-height: 300px;
+        overflow-y: auto;
+        background: #2a2a2a;
+        color: #ddd;
+        border: 1px solid #444;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 11px;
+        padding: 6px;
+        resize: vertical;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .sc-check { font-size: 12px; padding: 2px 0; }
+      .sc-check-ok { color: #4ade80; }
+      .sc-check-fail { color: #f87171; }
+      .sc-design-meta { font-size: 12px; color: #999; margin: 6px 0; }
+      .sc-download-btn {
+        display: block;
+        width: 100%;
+        padding: 8px 12px;
+        margin-top: 8px;
+        background: #2a6df0;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+      .sc-download-btn:hover { background: #1a5de0; }
+      .sc-back-btn {
+        display: block;
+        width: 100%;
+        padding: 6px 12px;
+        margin-top: 6px;
+        background: transparent;
+        color: #aaa;
+        border: 1px solid #555;
+        border-radius: 4px;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      .sc-back-btn:hover { background: #333; }
     </style>
   </head>
   <body style="background-color: #404040; margin: 0; padding: 2px">
@@ -34,17 +110,72 @@
           </div>
         </div>
         <div class="sc-window-content" is="ui-component">
-          <sc-capture-image class="sc-section sc-fields" data-state="show"
-            ><div is="ui-component">
-              <div class="sc-window sc-window-sections" is="ui-component">
-                <div class="sc-window-content" is="ui-component">
-                  <div class="sc-fields">
-                    <div>This page cannot be scripted. Please try a different URL.</div>
+
+          <!-- Options panel: shown when the page can be scripted -->
+          <div id="sc-options" class="sc-panel">
+            <div class="sc-fields" style="padding: 8px 12px">
+              <div style="margin-bottom: 6px; color: #ccc; font-size: 13px">Choose an action:</div>
+              <button id="sc-record-btn" class="sc-record-btn">
+                <span class="sc-icon fa-solid fa-video"></span>
+                Record Video
+              </button>
+              <button id="sc-design-btn" class="sc-design-btn">
+                <span class="sc-icon fa-solid fa-palette"></span>
+                Extract DESIGN.md
+              </button>
+            </div>
+          </div>
+
+          <!-- Fallback panel: shown when the page cannot be scripted -->
+          <div id="sc-fallback" class="sc-panel">
+            <sc-capture-image class="sc-section sc-fields" data-state="show">
+              <div is="ui-component">
+                <div class="sc-window sc-window-sections" is="ui-component">
+                  <div class="sc-window-content" is="ui-component">
+                    <div class="sc-fields">
+                      <div>This page cannot be scripted. Please try a different URL.</div>
+                      <button id="sc-design-btn-fallback" class="sc-design-btn" style="margin-top: 10px">
+                        <span class="sc-icon fa-solid fa-palette"></span>
+                        Extract DESIGN.md
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
+            </sc-capture-image>
+          </div>
+
+          <!-- Loading panel -->
+          <div id="sc-loading" class="sc-panel">
+            <div class="sc-fields" style="padding: 16px 12px; text-align: center; color: #ccc; font-size: 13px">
+              <span class="sc-icon fa-solid fa-spinner fa-spin"></span>
+              Extracting design tokens…
             </div>
-          </sc-capture-image>
+          </div>
+
+          <!-- Design result panel -->
+          <div id="sc-design-result" class="sc-panel">
+            <div class="sc-fields" style="padding: 8px 12px">
+              <div class="sc-design-meta" id="sc-design-meta"></div>
+              <div id="sc-design-validation" style="margin-bottom: 6px"></div>
+              <textarea id="sc-design-markdown" class="sc-design-textarea" readonly></textarea>
+              <button id="sc-download-btn" class="sc-download-btn">
+                <span class="sc-icon fa-solid fa-download"></span>
+                Download DESIGN.md
+              </button>
+              <button id="sc-back-btn" class="sc-back-btn">Back</button>
+            </div>
+          </div>
+
+          <!-- Error panel -->
+          <div id="sc-error" class="sc-panel">
+            <div class="sc-fields" style="padding: 12px; color: #f87171; font-size: 13px" id="sc-design-error">
+            </div>
+            <div style="padding: 0 12px 8px">
+              <button id="sc-error-back" class="sc-back-btn">Back</button>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
