@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scroll Capture — Browser Extension</title>
+    <link rel="stylesheet" href="content.css" />
+    <link rel="stylesheet" href="fontawesome.css" />
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: #1a1a2e;
+        color: #e0e0e0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px 20px;
+      }
+      .hero {
+        text-align: center;
+        max-width: 640px;
+        margin-bottom: 48px;
+      }
+      .hero img {
+        width: 96px;
+        height: 96px;
+        border-radius: 20px;
+        margin-bottom: 20px;
+      }
+      .hero h1 {
+        font-size: 2rem;
+        margin-bottom: 12px;
+      }
+      .hero p {
+        font-size: 1.05rem;
+        line-height: 1.6;
+        color: #a0a0b0;
+      }
+      .badge {
+        display: inline-block;
+        background: #16213e;
+        border: 1px solid #0f3460;
+        color: #e94560;
+        padding: 4px 14px;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+      }
+      .info-card {
+        background: #16213e;
+        border: 1px solid #0f3460;
+        border-radius: 12px;
+        padding: 24px 28px;
+        max-width: 560px;
+        width: 100%;
+        margin-bottom: 48px;
+      }
+      .info-card h2 {
+        font-size: 1.1rem;
+        margin-bottom: 14px;
+        color: #e94560;
+      }
+      .info-card ul {
+        list-style: none;
+      }
+      .info-card li {
+        padding: 6px 0;
+        color: #b0b0c0;
+        font-size: 0.92rem;
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+      }
+      .info-card li::before {
+        content: "▸";
+        color: #e94560;
+        flex-shrink: 0;
+      }
+      .popup-preview {
+        position: relative;
+      }
+      .popup-preview .label {
+        text-align: center;
+        font-size: 0.85rem;
+        color: #707080;
+        margin-bottom: 12px;
+      }
+      /* Render the extension popup UI statically */
+      .sc-default {
+        width: 330px;
+        font-size: 16.46px;
+      }
+      .sc-window {
+        background: #404040;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      }
+      .sc-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        background: #2a2a2a;
+      }
+      .sc-tabs { display: flex; align-items: center; gap: 6px; }
+      .sc-tab { display: flex; align-items: center; gap: 6px; color: #ccc; font-size: 0.85rem; }
+      .sc-icon { font-size: 0.9rem; }
+      .sc-icon.fa-circle-exclamation { color: #e94560; }
+      .close {
+        background: none;
+        border: none;
+        color: #888;
+        cursor: pointer;
+        font-size: 1rem;
+        padding: 2px 4px;
+      }
+      .sc-window-content { padding: 16px; }
+      .sc-fields { color: #bbb; font-size: 0.85rem; }
+    </style>
+  </head>
+  <body>
+    <div class="hero">
+      <img src="assets/images/get_started128.png" alt="Scroll Capture" />
+      <div class="badge">Chrome Extension · v0.5.1</div>
+      <h1>Scroll Capture</h1>
+      <p>
+        Record your websites and automate scrolling and mouse actions for your
+        portfolio screen captures. Also extracts design tokens (colors,
+        typography, spacing, motion) from any page and generates a
+        implementation-ready <code>DESIGN.md</code>. This is a Manifest V3
+        Chrome extension — it runs inside the browser as an installed
+        extension, not as a web app.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <h2>How to install & use</h2>
+      <ul>
+        <li>Open <code>chrome://extensions</code> in Chrome</li>
+        <li>Enable <strong>Developer mode</strong> (top-right toggle)</li>
+        <li>Click <strong>Load unpacked</strong> and select this project folder</li>
+        <li>Pin the Scroll Capture extension to your toolbar</li>
+        <li>Navigate to a website and click the extension icon</li>
+        <li>Choose <strong>Record Video</strong> to capture, or <strong>Extract DESIGN.md</strong> to generate a design system document</li>
+      </ul>
+    </div>
+
+    <div class="info-card">
+      <h2>DESIGN.md Extractor</h2>
+      <ul>
+        <li>Samples visible elements and extracts computed styles (typography, colors, spacing, radius, shadows, motion)</li>
+        <li>Normalizes raw CSS values into semantic design tokens</li>
+        <li>Infers site profile (audience, product surface) from page signals</li>
+        <li>Generates a validated <code>DESIGN.md</code> with WCAG 2.2 AA accessibility rules</li>
+        <li>Logic ported from <code>generate-design-scope/</code> modules (normalize, generate, validate)</li>
+      </ul>
+    </div>
+
+    <div class="popup-preview">
+      <div class="label">Extension popup preview</div>
+      <div class="sc-default" data-theme-light="false">
+        <div class="sc-window">
+          <div class="sc-title">
+            <div class="sc-tabs">
+              <span class="sc-tab sc-title-tab">
+                <span class="sc-icon fa-solid fa-circle-exclamation"></span>
+                <span class="sc-label">Scroll Capture</span>
+              </span>
+            </div>
+            <div class="sc-tabs">
+              <span class="sc-tab">
+                <button title="Close" class="close">
+                  <span class="sc-icon fa-solid fa-times-circle"></span>
+                </button>
+              </span>
+            </div>
+          </div>
+          <div class="sc-window-content">
+            <div class="sc-fields">
+              <div>This page cannot be scripted. Please try a different URL.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
