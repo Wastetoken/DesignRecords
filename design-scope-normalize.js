@@ -29,7 +29,7 @@
     for (var _i = 0, _a = payload.typography || []; _i < _a.length; _i++) {
       var row = _a[_i];
       var fontSize = parsePx(row.fontSize);
-      if (fontSize !== null) increment(typographyMap, String(fontSize));
+      if (fontSize !== null && fontSize >= 8) increment(typographyMap, String(fontSize));
       var fontFamily = normalizeFontFamilyStack(row.fontFamily);
       if (fontFamily) increment(fontFamilyMap, fontFamily);
     }

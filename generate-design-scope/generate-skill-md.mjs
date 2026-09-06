@@ -114,12 +114,18 @@ function slugify(value) {
     .slice(0, 48);
 }
 
+function sampleAcrossRange(items, limit) {
+  if (items.length <= limit) return items;
+  return Array.from({ length: limit }, (_, i) =>
+    items[Math.round((i * (items.length - 1)) / (limit - 1))]
+  );
+}
+
 function joinTokens(rows, limit) {
   if (!rows || rows.length === 0) {
     return "manual token definitions required";
   }
-  return rows
-    .slice(0, limit)
+  return sampleAcrossRange(rows, limit)
     .map((row) => `\`${row.token}=${row.value}\``)
     .join(", ");
 }
@@ -127,7 +133,7 @@ function joinTokens(rows, limit) {
 function joinTokenGroups(groups, limitPerGroup) {
   const lines = groups
     .filter((rows) => rows && rows.length > 0)
-    .map((rows) => rows.slice(0, limitPerGroup).map((row) => `\`${row.token}=${row.value}\``).join(", "));
+    .map((rows) => sampleAcrossRange(rows, limitPerGroup).map((row) => `\`${row.token}=${row.value}\``).join(", "));
   if (lines.length === 0) {
     return "manual token definitions required";
   }

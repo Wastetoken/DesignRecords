@@ -20,7 +20,7 @@ export function normalizeExtractedStyles(payload) {
 
   for (const row of payload.typography || []) {
     const fontSize = parsePx(row.fontSize);
-    if (fontSize !== null) {
+    if (fontSize !== null && fontSize >= 8) {
       increment(typographyMap, String(fontSize));
     }
 

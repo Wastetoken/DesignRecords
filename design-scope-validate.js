@@ -67,7 +67,67 @@
       checks.push({ label: "Contains recommendation wording", ok: true });
     }
 
+    runNumericSanityChecks(markdown, checks, errors, warnings);
+
     return { isValid: errors.length === 0, errors: errors, warnings: warnings, checks: checks };
+  }
+
+  function runNumericSanityChecks(markdown, checks, errors, warnings) {
+    var tokens = extractTokenValues(markdown);
+
+    if (tokens.length === 0) {
+      warnings.push("No token values found in markdown for numeric sanity checks.");
+      return;
+    }
+
+    var zeroTokens = tokens.filter(function (t) { return t.numericValue === 0; });
+    runCheck(
+      zeroTokens.length === 0,
+      "No token value equals 0 (" + zeroTokens.length + " found)",
+      checks,
+      errors
+    );
+
+    var fontSizes = tokens.filter(function (t) { return t.token.indexOf("font.size.") === 0 && t.token !== "font.size.base"; });
+    var baseFontMatch = markdown.match(/`font\.size\.base=(\d+(?:\.\d+)?)px`/);
+    if (fontSizes.length > 0 && baseFontMatch) {
+      var maxSize = Math.max.apply(null, fontSizes.map(function (t) { return t.numericValue; }));
+      var baseSize = parseFloat(baseFontMatch[1]);
+      runCheck(
+        maxSize >= baseSize,
+        "Largest typography value (" + maxSize + "px) >= base font size (" + baseSize + "px)",
+        checks,
+        errors
+      );
+    }
+
+    var spacingTokens = tokens.filter(function (t) { return t.token.indexOf("space.") === 0; });
+    if (spacingTokens.length >= 2) {
+      var minSpace = Math.min.apply(null, spacingTokens.map(function (t) { return t.numericValue; }));
+      var maxSpace = Math.max.apply(null, spacingTokens.map(function (t) { return t.numericValue; }));
+      var span = maxSpace - minSpace;
+      runCheck(
+        span >= 24,
+        "Spacing scale spans at least 24px (actual: " + span + "px)",
+        checks,
+        errors
+      );
+    }
+  }
+
+  function extractTokenValues(markdown) {
+    var tokens = [];
+    var pattern = /`([^`]+)=([^`]+)`/g;
+    var match;
+    while ((match = pattern.exec(markdown)) !== null) {
+      var numericMatch = match[2].match(/^(\d+(?:\.\d+)?)/);
+      tokens.push({
+        token: match[1],
+        rawValue: match[2],
+        numericValue: numericMatch ? parseFloat(numericMatch[1]) : NaN
+      });
+    }
+    return tokens;
   }
 
   function runCheck(condition, label, checks, errors) {

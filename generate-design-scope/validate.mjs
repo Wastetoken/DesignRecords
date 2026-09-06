@@ -68,12 +68,72 @@ export function validateMarkdownOutput(mode, markdown) {
     checks.push({ label: "Contains recommendation wording", ok: true });
   }
 
+  runNumericSanityChecks(markdown, checks, errors, warnings);
+
   return {
     isValid: errors.length === 0,
     errors,
     warnings,
     checks
   };
+}
+
+function runNumericSanityChecks(markdown, checks, errors, warnings) {
+  const tokens = extractTokenValues(markdown);
+
+  if (tokens.length === 0) {
+    warnings.push("No token values found in markdown for numeric sanity checks.");
+    return;
+  }
+
+  const zeroTokens = tokens.filter((t) => t.numericValue === 0);
+  runCheck(
+    zeroTokens.length === 0,
+    `No token value equals 0 (${zeroTokens.length} found)`,
+    checks,
+    errors
+  );
+
+  const fontSizes = tokens.filter((t) => t.token.startsWith("font.size.") && t.token !== "font.size.base");
+  const baseFontMatch = markdown.match(/`font\.size\.base=(\d+(?:\.\d+)?)px`/);
+  if (fontSizes.length > 0 && baseFontMatch) {
+    const maxSize = Math.max(...fontSizes.map((t) => t.numericValue));
+    const baseSize = parseFloat(baseFontMatch[1]);
+    runCheck(
+      maxSize >= baseSize,
+      `Largest typography value (${maxSize}px) >= base font size (${baseSize}px)`,
+      checks,
+      errors
+    );
+  }
+
+  const spacingTokens = tokens.filter((t) => t.token.startsWith("space."));
+  if (spacingTokens.length >= 2) {
+    const minSpace = Math.min(...spacingTokens.map((t) => t.numericValue));
+    const maxSpace = Math.max(...spacingTokens.map((t) => t.numericValue));
+    const span = maxSpace - minSpace;
+    runCheck(
+      span >= 24,
+      `Spacing scale spans at least 24px (actual: ${span}px)`,
+      checks,
+      errors
+    );
+  }
+}
+
+function extractTokenValues(markdown) {
+  const tokens = [];
+  const pattern = /`([^`]+)=([^`]+)`/g;
+  let match;
+  while ((match = pattern.exec(markdown)) !== null) {
+    const numericMatch = match[2].match(/^(\d+(?:\.\d+)?)/);
+    tokens.push({
+      token: match[1],
+      rawValue: match[2],
+      numericValue: numericMatch ? parseFloat(numericMatch[1]) : NaN
+    });
+  }
+  return tokens;
 }
 
 function runCheck(condition, label, checks, errors) {
