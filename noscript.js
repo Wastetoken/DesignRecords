@@ -82,7 +82,7 @@ function showDesignResult(response, tabId, filename, downloadType) {
   };
 
   document.getElementById('sc-back-btn').onclick = function () {
-    startPopup(tabId);
+    setupFallback(tabId);
   };
 }
 
@@ -90,45 +90,22 @@ function showError(msg) {
   showPanel('sc-error');
   document.getElementById('sc-design-error').textContent = 'Extraction failed: ' + msg;
   document.getElementById('sc-error-back').onclick = function () {
-    var backBtn = document.getElementById('sc-error-back');
-    /* return to whichever panel makes sense */
-    startPopup(currentTabId);
+    setupFallback(currentTabId);
   };
 }
 
 var currentTabId = null;
 
-/* ── Popup entry point ───────────────────────────────────────── */
-function startPopup(tabId) {
+/* ── Fallback setup (page cannot be scripted) ────────────────── */
+function setupFallback(tabId) {
   currentTabId = tabId;
-  /* Try to script the page — if it works, show options; if not, fallback */
-  chrome.scripting.executeScript({
-    target: { tabId: tabId },
-    func: function () { return document.title; }
-  }).then(function () {
-    /* Page can be scripted — show options */
-    showPanel('sc-options');
-    document.getElementById('sc-record-btn').onclick = function () {
-      chrome.runtime.sendMessage({ type: 'scrollCaptureShowMainPanel', tabId: tabId }, function () {
-        window.close();
-      });
-    };
-    document.getElementById('sc-design-btn').onclick = function () {
-      extractDesign(tabId);
-    };
-    document.getElementById('sc-skill-btn').onclick = function () {
-      extractSkill(tabId);
-    };
-  }).catch(function () {
-    /* Page cannot be scripted — show fallback */
-    showPanel('sc-fallback');
-    document.getElementById('sc-design-btn-fallback').onclick = function () {
-      extractDesign(tabId);
-    };
-    document.getElementById('sc-skill-btn-fallback').onclick = function () {
-      extractSkill(tabId);
-    };
-  });
+  showPanel('sc-fallback');
+  document.getElementById('sc-design-btn-fallback').onclick = function () {
+    extractDesign(tabId);
+  };
+  document.getElementById('sc-skill-btn-fallback').onclick = function () {
+    extractSkill(tabId);
+  };
 }
 
 /* ── Init ───────────────────────────────────────────────────── */
@@ -142,7 +119,21 @@ document.querySelector('button.close').addEventListener('click', function () {
 var queryOptions = { active: true, lastFocusedWindow: true };
 chrome.tabs.query(queryOptions).then(function (tabs) {
   if (tabs && tabs.length > 0) {
-    startPopup(tabs[0].id);
+    var tabId = tabs[0].id;
+    currentTabId = tabId;
+    /* Try to script the page — if it works, open the main panel directly
+       (restoring the original behavior: Video + Image/screenshot tabs).
+       If it fails, show the fallback panel with Design/Skill extraction. */
+    chrome.scripting.executeScript({
+      target: { tabId: tabId },
+      func: function () { return document.title; }
+    }).then(function () {
+      chrome.runtime.sendMessage({ type: 'scrollCaptureShowMainPanel', tabId: tabId }, function () {
+        window.close();
+      });
+    }).catch(function () {
+      setupFallback(tabId);
+    });
   } else {
     showPanel('sc-fallback');
   }
